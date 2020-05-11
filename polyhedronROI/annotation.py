@@ -10,7 +10,7 @@ try:
 except ImportError:
     raise ImportError("Unable to import STEPS. Please install it from http://steps.sourceforge.net/.")
 
-def gen_mesh_tet_spatial_index(tetmesh, import_scale):
+def gen_tet_spatial_index(tetmesh, import_scale):
     """
     Generate a spatial index for all tetrahedrons in a STEPS Tetmesh object.
 

@@ -25,7 +25,7 @@ import polyhedronROI
 
 The first step is to create a spatial index of the mesh elements
 ```
-spatial_index = polyhedronROI.gen_mesh_tet_spatial_index(TETMESH, IMPORT_SCALE)
+spatial_index = polyhedronROI.gen_tet_spatial_index(TETMESH, IMPORT_SCALE)
 ```
 * `TETMESH`: A steps.geom.Tetmesh object
 * `IMPORT_SCALE`: The scale used when the mesh is imported to STEPS.

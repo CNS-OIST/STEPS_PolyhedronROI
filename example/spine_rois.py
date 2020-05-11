@@ -24,7 +24,7 @@ def main():
     tetmesh = meshio.importAbaqus("meshes/tets.inp", 1e-6)[0]
     
     print("Create spatial index")
-    spatial_index = polyhedronROI.gen_mesh_tet_spatial_index(tetmesh, 1e-6)
+    spatial_index = polyhedronROI.gen_tet_spatial_index(tetmesh, 1e-6)
 
     print("Add ROIs according to boundaries and signitures")
     boundary_files = ["meshes/ER.stl", "meshes/PSD.stl"]
