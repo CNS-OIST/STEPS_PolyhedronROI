@@ -1,6 +1,6 @@
 """
 This example imports a dendritic spine mesh reconstruction to STEPS,
-and creates tetrahedral Region of Interest (ROI)s using polyhedral surface boundaries.
+and creates tetrahedral Regions of Interest (ROI)s using polyhedral surface boundaries.
 The mesh with newly created ROIs is then exported to STEPS xml format,
 and visualized using steps.visual module.
 
@@ -26,7 +26,7 @@ def main():
     print("Create spatial index")
     spatial_index = polyhedronROI.gen_tet_spatial_index(tetmesh, 1e-6)
 
-    print("Add ROIs according to boundaries and signitures")
+    print("Add ROIs according to boundaries and signatures")
     boundary_files = ["meshes/ER.stl", "meshes/PSD.stl"]
     roi_labels = {"ER": "-*",   # inside ER.stl, doesn't matter for PSD.stl
                   "PSD": "+-"}  # not inside ER.stl, inside PSD.stl

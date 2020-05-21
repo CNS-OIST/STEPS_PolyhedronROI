@@ -8,7 +8,7 @@ setuptools.setup(
     version="1.0.0",
     author="Weiliang Chen",
     author_email="w.chen@oist.jp",
-    description="Create Regions of Interest (ROI) in STEPS Tetmesh object using Polyhedral surface boundaries.",
+    description="Create Regions of Interest (ROI)s in STEPS Tetmesh object using Polyhedral surface boundaries.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/CNS-OIST/STEPS_PolyhedronROI",
