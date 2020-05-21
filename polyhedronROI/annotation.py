@@ -16,7 +16,7 @@ def gen_tet_spatial_index(tetmesh, import_scale):
 
     Parameters:
         * tetmesh: A steps.geom.Tetmesh object
-        * import_scale: The scale used when import the mesh data using steps.utilities.meshio
+        * import_scale: The scale used when importing the mesh data using steps.utilities.meshio
 
     Note: the import_scale is the scale value used when the mesh is imported
     to STEPS using steps.utilities.meshio. The value is usually 1e-6 (micrometer)
@@ -44,13 +44,13 @@ def add_tet_ROIs(tetmesh, import_scale, spatial_index, boundary_mesh_files, roi_
     
     Parameters:
         * tetmesh: A steps.geom.Tetmesh object
-        * import_scale: The scale used when import the mesh data using steps.utilities.meshio
+        * import_scale: The scale used when importing the mesh data using steps.utilities.meshio
         * spatial_index: A spatial index created from gen_mesh_tet_spatial_index
         * boundary_mesh_files: A list of file locations to surface meshes whose combinations define 
         the ROI boundaries.
         * roi_labels: A dict of [ROI_ID : ROI_SIGNATURES] pairs.
-        ROI_ID is the name id of the ROI will be stored in tetmesh.
-        ROI_SIGNITURES is a sign string consists of only "+", "-" or "*", with length of len(boundary_mesh_files)
+        ROI_ID is the name id of the ROI that will be stored in tetmesh.
+        ROI_SIGNATURES is a sign string consisting of only "+", "-" or "*", with length of len(boundary_mesh_files)
         For a boundary mesh boundary_mesh_files[b], ROI_SIGNATURES[b] should be: 
             "+", if ROI elements are not inside the boundary
             "-", if ROI elements are inside the boundary

@@ -14,7 +14,7 @@ then create the ROIs according to the boundaries and labeling signatures.
 ```
 git clone https://github.com/CNS-OIST/STEPS_PolyhedronROI.git
 cd STEPS_PolyhedronROI
-python steup.py install
+python setup.py install
 ```
 
 ## Usage
@@ -30,7 +30,7 @@ spatial_index = polyhedronROI.gen_tet_spatial_index(TETMESH, IMPORT_SCALE)
 * `TETMESH`: A steps.geom.Tetmesh object
 * `IMPORT_SCALE`: The scale used when the mesh is imported to STEPS.
 
-The tetrahedral ROIs can be defined and add to `TETMESH` using
+The tetrahedral ROIs can be defined and added to `TETMESH` using
 ```
 polyhedronROI.add_tet_ROIs(TETMESH, IMPORT_SCALE, spatial_index, BOUNDARY_FILES, ROI_LABELS)
 ```
@@ -41,7 +41,7 @@ boundary_files = ["meshes/ER.stl", "meshes/PSD.stl"]
 ``` 
 * `ROI_LABELS`: A `dict` of [`ROI_ID` : `ROI_SIGNATURES`] pairs.
     * `ROI_ID`: Name id of the ROI
-    * `ROI_SIGNATURES`: A sign string consists of only `+`, `-` and `*`. The length of the
+    * `ROI_SIGNATURES`: A sign string consisting of only `+`, `-` and `*`. The length of the
     string should be the same as `len(BOUNDARY_FILES)`. For a boundary file `BOUNDARY_FILES[b]`,
     the signature `ROI_SIGNATURES[b]` should be
         * `+`: if the ROI elements are not inside the boundary mesh
@@ -53,7 +53,7 @@ boundary_files = ["meshes/ER.stl", "meshes/PSD.stl"]
 An example is provided in [example/spine_rois.py](example/spine_rois.py).
 
 This example imports a dendritic spine mesh reconstruction to STEPS,
-and creates tetrahedral Region of Interest (ROI)s using polyhedral surface boundaries.
+and creates tetrahedral Regions of Interest (ROI)s using polyhedral surface boundaries.
 The mesh with newly created ROIs is then exported to STEPS xml format,
 and visualized using steps.visual module.
 
