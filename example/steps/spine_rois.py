@@ -17,21 +17,21 @@ import steps.visual
 
 import pyqtgraph as pg
 
-import polyhedronROI
+import polyhedronROI.steps as pRs
 
 def main():
     print("Import mesh to STEPS")
     tetmesh = meshio.importAbaqus("meshes/tets.inp", 1e-6)[0]
-    
+
     print("Create spatial index")
-    spatial_index = polyhedronROI.gen_tet_spatial_index(tetmesh, 1e-6)
+    spatial_index = pRs.gen_tet_spatial_index(tetmesh, 1e-6)
 
     print("Add ROIs according to boundaries and signatures")
     boundary_files = ["meshes/ER.stl", "meshes/PSD.stl"]
     roi_labels = {"ER": "-*",   # inside ER.stl, doesn't matter for PSD.stl
                   "PSD": "+-"}  # not inside ER.stl, inside PSD.stl
 
-    polyhedronROI.add_tet_ROIs(tetmesh, 1e-6, spatial_index, boundary_files, roi_labels)
+    pRs.add_tet_ROIs(tetmesh, 1e-6, spatial_index, boundary_files, roi_labels)
 
     print("Save to STEPS xml file")
     meshio.saveMesh("meshes/labeled_mesh", tetmesh)
@@ -63,7 +63,7 @@ def main():
         Cyto=[1.0, 1.0, 1.0, 0.1], # grey, alpha 0.1
         ER=[1.0, 0.0, 0.0, 0.1],  # red, alpha 0.1
     )
-    
+
     app = pg.mkQApp()
     w = steps.visual.TetPartitionDisplay(
         loaded_mesh, tet_groups, color_map=color_map
