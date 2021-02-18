@@ -164,9 +164,20 @@ def tag_mesh_entities(input_mesh, boundary_files, roi_labels, scale_ratio=1.0, \
     nTets = len(ele_ids)
     print("Number of tets in original mesh: ", nTets)
 
+    # Save old entities
+    old_ent = gmsh.model.getEntities(dim=tet_t.dim)
+    nEntities_old = len(old_ent)
+    print("Number of entities in original mesh: ", nEntities_old)
+
+    # Save old phys groups and names (only 3D)
+    old_grp = gmsh.model.getPhysicalGroups(dim=tet_t.dim)
+    old_grp_names = list()
+    for grp in old_grp:
+        old_grp_names.append(gmsh.model.getPhysicalName(grp[0], grp[1]))
+
     # Select tets based on ROI list
     nROIs = len(ROIs)
-    nEntities = nROIs + 1 # ROIs plus untagged/original volume
+    nEntities = nROIs + nEntities_old # ROIs plus original volumes
     tets_select = [[] for _ in range(nEntities)]     # selected elements
     nodes_select = [[] for _ in range(nEntities)]    # correspoding nodes
     nodes_coords = [[] for _ in range(nEntities)]    # nodes coordinates
@@ -178,7 +189,7 @@ def tag_mesh_entities(input_mesh, boundary_files, roi_labels, scale_ratio=1.0, \
             for t in ROIs[id_roi]:
                 if t == i:
                     is_in_ROIs = True
-                    id_entity = id_roi + 1
+                    id_entity = id_roi + nEntities_old
                     tets_select[id_entity].extend([ele_ids[i]])
                     nodes_select[id_entity].extend(node_ids[tet_t.nnodes*i:\
                         tet_t.nnodes*i+tet_t.nnodes])
@@ -189,8 +200,17 @@ def tag_mesh_entities(input_mesh, boundary_files, roi_labels, scale_ratio=1.0, \
                         nodes_coords[id_entity].extend(node_coo)
 
         if not is_in_ROIs:
-            # Default tag, not in any ROI
-            id_entity = 0
+            # Not in a ROI, check to which entity it used to belong
+            id_entity = -1
+            ent_count = 0
+            for dont_care, ent_tag in old_ent:
+                ent_count += 1
+                elementTags, nodeTags = gmsh.model.mesh.getElementsByType(tet_t.etype, tag=ent_tag)
+                if np.isin(elementTags, ele_ids[i]).any():
+                    id_entity = ent_count
+            # Did we find the tet
+            if id_entity < 0:
+                raise "cannot find entity fot tet"
             tets_select[id_entity].extend([ele_ids[i]])
             nodes_select[id_entity].extend(node_ids[tet_t.nnodes*i:\
                 tet_t.nnodes*i+tet_t.nnodes])
@@ -205,19 +225,30 @@ def tag_mesh_entities(input_mesh, boundary_files, roi_labels, scale_ratio=1.0, \
         output_mesh = gmsh.model.getCurrent()+".msh"
     gmsh.clear()
 
-    # Add new discrete entities: non tagged tets + ROIs
+    # Add new discrete entities: old entities + ROIs based entities
     roi_names = list(roi_labels.keys())
     for i in range(nEntities):
         vnew = gmsh.model.addDiscreteEntity(tet_t.dim)
         gmsh.model.mesh.addNodes(tet_t.dim, vnew, nodes_select[i], nodes_coords[i])
         gmsh.model.mesh.removeDuplicateNodes()
         gmsh.model.mesh.addElementsByType(vnew, tet_t.etype, tets_select[i], nodes_select[i])
-        volume_tag = i + 1000
-        gmsh.model.addPhysicalGroup(dim=tet_t.dim, tags=[vnew], tag=volume_tag)
-        if i == 0:
-            gmsh.model.setPhysicalName(dim=tet_t.dim, tag=volume_tag, name="Initial domain")
+
+        if i < nEntities_old:
+            volume_tag = old_grp[i][1]
+            gmsh.model.addPhysicalGroup(dim=tet_t.dim, tags=[vnew], tag=volume_tag)
+            ent_tag = old_grp_names[i]
+            if len(ent_tag) > 0:
+                gmsh.model.setPhysicalName(dim=tet_t.dim, tag=volume_tag, name=ent_tag)
         else:
-            gmsh.model.setPhysicalName(dim=tet_t.dim, tag=volume_tag, name=roi_names[i-1])
+            volume_tag = old_grp[-1][1] + i - nEntities_old + 1
+            gmsh.model.addPhysicalGroup(dim=tet_t.dim, tags=[vnew], tag=volume_tag)
+            gmsh.model.setPhysicalName(dim=tet_t.dim, tag=volume_tag, name=roi_names[i-nEntities_old])
+
+    # Get element ids and node ids in mesh from element type (check nTets)
+    ele_ids, node_ids = gmsh.model.mesh.getElementsByType(tet_t.etype)
+    nTets = len(ele_ids)
+    print("Number of tets in new mesh: ", nTets)
+
 
     # To visualize the model we can run the graphical user interface from gmsh
     if interactive:
