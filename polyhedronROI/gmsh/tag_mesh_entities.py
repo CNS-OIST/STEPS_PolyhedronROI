@@ -24,13 +24,12 @@ def gmsh_fixture():
     gmsh.finalize()
 
 
-def gen_tet_spatial_index(mesh, import_scale):
+def gen_tet_spatial_index(mesh):
     """
     Generate a spatial index for all tetrahedrons in a gmsh model assuming only tets.
 
     Parameters:
         * mesh: a gmsh.model.mesh object
-        * import_scale: The scale used when importing the mesh data
 
     """
     ele_ids, node_ids = mesh.getElementsByType(tet_t.etype)
@@ -55,7 +54,7 @@ def gen_tet_spatial_index(mesh, import_scale):
             vert_max = np.maximum(node_coo, vert_max)
             vert_min = np.minimum(node_coo, vert_min)
 
-        bounding_box = np.append(vert_min, vert_max) / import_scale
+        bounding_box = np.append(vert_min, vert_max)
         spatial_index.insert(tet_id, bounding_box)
 
     return spatial_index
@@ -152,7 +151,7 @@ def tag_mesh_entities(input_mesh, boundary_files, roi_labels, scale_ratio=1.0, \
           str(gmsh.model.getDimension()) + 'D)')
 
     # Create spatial index
-    spatial_index = gen_tet_spatial_index(gmsh.model.mesh, scale_ratio)
+    spatial_index = gen_tet_spatial_index(gmsh.model.mesh)
 
     # Tag ROIs
     ROIs = add_tet_ROIs(gmsh.model.mesh, scale_ratio, spatial_index, \
@@ -204,10 +203,10 @@ def tag_mesh_entities(input_mesh, boundary_files, roi_labels, scale_ratio=1.0, \
             id_entity = -1
             ent_count = 0
             for dont_care, ent_tag in old_ent:
-                ent_count += 1
                 elementTags, nodeTags = gmsh.model.mesh.getElementsByType(tet_t.etype, tag=ent_tag)
                 if np.isin(elementTags, ele_ids[i]).any():
                     id_entity = ent_count
+                ent_count += 1
             # Did we find the tet
             if id_entity < 0:
                 raise "cannot find entity fot tet"
@@ -226,6 +225,12 @@ def tag_mesh_entities(input_mesh, boundary_files, roi_labels, scale_ratio=1.0, \
     gmsh.clear()
 
     # Add new discrete entities: old entities + ROIs based entities
+    if old_grp:
+        # get last old tag
+        base_tag = old_grp[-1][1]
+    else:
+        # only untagged tets were present
+        base_tag = 1
     roi_names = list(roi_labels.keys())
     for i in range(nEntities):
         vnew = gmsh.model.addDiscreteEntity(tet_t.dim)
@@ -234,13 +239,17 @@ def tag_mesh_entities(input_mesh, boundary_files, roi_labels, scale_ratio=1.0, \
         gmsh.model.mesh.addElementsByType(vnew, tet_t.etype, tets_select[i], nodes_select[i])
 
         if i < nEntities_old:
-            volume_tag = old_grp[i][1]
+            if old_grp:
+                volume_tag = old_grp[i][1]
+            else:
+                volume_tag = base_tag
             gmsh.model.addPhysicalGroup(dim=tet_t.dim, tags=[vnew], tag=volume_tag)
-            ent_tag = old_grp_names[i]
-            if len(ent_tag) > 0:
+            if old_grp_names:
+                ent_tag = old_grp_names[i]
                 gmsh.model.setPhysicalName(dim=tet_t.dim, tag=volume_tag, name=ent_tag)
+
         else:
-            volume_tag = old_grp[-1][1] + i - nEntities_old + 1
+            volume_tag = base_tag + i - nEntities_old + 1
             gmsh.model.addPhysicalGroup(dim=tet_t.dim, tags=[vnew], tag=volume_tag)
             gmsh.model.setPhysicalName(dim=tet_t.dim, tag=volume_tag, name=roi_names[i-nEntities_old])
 

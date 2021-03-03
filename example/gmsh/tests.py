@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import polyhedronROI.gmsh as pRg
 import sys
 
