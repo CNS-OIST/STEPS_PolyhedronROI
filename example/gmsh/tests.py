@@ -4,10 +4,12 @@ import sys
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: " + sys.argv[0] + " <cube|cube-overlap|spine> [--interactive]")
+        print("Usage: " + sys.argv[0] + " <cube|cube-overlap|cube-overlap-ok|spine> [--interactive]")
         exit()
 
     test = sys.argv[1]
+
+    duplicate = False
 
     if test == "cube":
         # cube test
@@ -18,10 +20,19 @@ if __name__ == "__main__":
 
     elif test == "cube-overlap":
         # cube test with 2 ROIs overlapping
+        # this test should raise an exception
         path = "./meshes/cube"
         mesh = path+"/cube.msh"
         boundary_files = [path+"/region_2.stl", path+"/region_2.stl"]
         roi_labels = {"roi1": "-*", "roi2": "*-"}
+
+    elif test == "cube-overlap-ok":
+        # cube test with 2 ROIs overlapping
+        path = "./meshes/cube"
+        mesh = path+"/cube.msh"
+        boundary_files = [path+"/region_2.stl", path+"/region_2.stl"]
+        roi_labels = {"roi1": "-*", "roi2": "*-"}
+        duplicate = True
 
     elif test == "spine":
         # spine ROIs
@@ -38,4 +49,5 @@ if __name__ == "__main__":
 
     with pRg.gmsh_fixture():
         pRg.tag_mesh_entities(mesh, boundary_files, roi_labels, \
-            output_mesh="mod_"+test+".msh", interactive=interactive)
+            duplicate=duplicate, output_mesh="mod_"+test+".msh", \
+            interactive=interactive)

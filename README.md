@@ -74,6 +74,9 @@ python spine_rois.py
 
 
 ### gmsh
+A noteworthy difference between the `STEPS` and `gmsh` implementation is tets are duplicated
+in the latter if they belong to multiple ROIs. This is a limitation related to the latest `gmsh` format
+
 in `Python` interface, import the module
 ```python
 import polyhedronROI.gmsh as pRg
@@ -83,17 +86,20 @@ either use the provided context manager or initialize gmsh API, then call the ta
 ```python
 with pRg.gmsh_fixture():
         pRg.tag_mesh_entities(input_mesh=MESHIN, boundary_files=BOUNDARY_FILES, \
-            roi_labels=ROI_LABELS, output_mesh=MESHOUT, interactive=INTERACTIVE)
+            roi_labels=ROI_LABELS, duplicate=DUPLICATE, output_mesh=MESHOUT, \
+            interactive=INTERACTIVE)
 # Alternatively
 # gmsh.initialize()
 # pRg.tag_mesh_entities(input_mesh=MESHIN, boundary_files=BOUNDARY_FILES, \
-            # roi_labels=ROI_LABELS, output_mesh=MESHOUT, interactive=INTERACTIVE)
+            # roi_labels=ROI_LABELS, duplicate=DUPLICATE, output_mesh=MESHOUT, \
+            # interactive=INTERACTIVE)
 # gmsh.finalize()
 
 ```
 * `MESHIN`: A string containing the path to a gmsh file
+* `DUPLICATE`: A optional boolean that allows for the duplication of tets (default `False`)
 * `MESHOUT`: A optional string containing the path of the output gmsh file
-* `INTERACTIVE`: A boolean that if set to `True` opens the gmsh GUI
+* `INTERACTIVE`: A optional boolean that if set to `True` opens the gmsh GUI (default `False`)
 
 ##### Example
 An example with few tests is provided in [example/gmsh/tests.py](example/gmsh/spine_rois.py).
@@ -104,5 +110,5 @@ An example with few tests is provided in [example/gmsh/tests.py](example/gmsh/sp
 ##### Run the example
 ```
 cd example/gmsh
-python tests.py <cube|cube-overlap|spine> [--interactive]
+python tests.py <cube|cube-overlap|overlap-ok|spine> [--interactive]
 ```

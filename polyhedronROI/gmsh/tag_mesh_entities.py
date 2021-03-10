@@ -126,7 +126,7 @@ def add_tet_ROIs(mesh, import_scale, spatial_index, boundary_mesh_files, roi_lab
     return ROIs
 
 def tag_mesh_entities(input_mesh, boundary_files, roi_labels, scale_ratio=1.0, \
-    output_mesh=None, interactive=False):
+    duplicate=False, output_mesh=None, interactive=False):
     """Tag mesh entities
     Args:
         input_mesh: path to a GMSH mesh
@@ -134,6 +134,7 @@ def tag_mesh_entities(input_mesh, boundary_files, roi_labels, scale_ratio=1.0, \
         the ROI boundaries.
         roi_labels: A dict of [ROI_ID : ROI_SIGNATURES] pairs.
         scale_ratio: scale conversion factor between stl and msh
+        duplicate: allow duplication of tets tagged multiple times
         interactive: to visualize the mesh using the graphical UI provide by gmsh API
         output_mesh: in-place edit if None, path to output mesh otherwise
     """
@@ -187,6 +188,9 @@ def tag_mesh_entities(input_mesh, boundary_files, roi_labels, scale_ratio=1.0, \
         for id_roi in range(nROIs):
             for t in ROIs[id_roi]:
                 if t == i:
+                    if is_in_ROIs and not duplicate:
+                        raise Exception("ROIs overlap detected, you need to enable dublication of tets")
+
                     is_in_ROIs = True
                     id_entity = id_roi + nEntities_old
                     tets_select[id_entity].extend([ele_ids[i]])
