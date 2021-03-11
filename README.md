@@ -70,7 +70,7 @@ and visualized using steps.visual module.
 cd example/steps
 python spine_rois.py
 ```
-![visual](example/visual.png)
+![visual](example/steps/visual.png)
 
 
 ### gmsh
